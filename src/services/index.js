@@ -1,0 +1,10 @@
+module.exports.userService = require("./user.service");
+module.exports.adminService = require("./admin.service");
+module.exports.eventService = require("./event.service");
+module.exports.productService = require("./product.service");
+module.exports.blogService = require("./blog.service");
+module.exports.bookingService = require("./booking.service");
+module.exports.tableService = require("./table.service");
+module.exports.categoryService = require("./category.service");
+module.exports.slotService = require("./slot.service");
+module.exports.bookingSlotsService = require("./booking.slots.service");

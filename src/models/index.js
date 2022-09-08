@@ -1,0 +1,10 @@
+module.exports.User = require("./user.model");
+module.exports.Product = require("./product.model");
+module.exports.Event = require("./event.model");
+module.exports.Connection = require("./chat.connection.model");
+module.exports.Blog = require("./blog.model");
+module.exports.Table = require("./table.model");
+module.exports.Booking = require("./booking.model");
+module.exports.Category = require("./category.model");
+module.exports.Slots = require("./slots.model");
+module.exports.BookingSlots = require("./booking.slot.model");
