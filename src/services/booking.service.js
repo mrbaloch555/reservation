@@ -44,8 +44,6 @@ const createBooking = async (userId, bookingBody) => {
     );
     if (valid) {
       const now = new Date();
-      console.log(date);
-      console.log(now);
       const diffTime = Math.abs(date - now);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       if (diffDays > 30)
@@ -64,7 +62,7 @@ const createBooking = async (userId, bookingBody) => {
         bookingSlot: bookingSlot._id,
         slot: bookingBody.slot,
         reservedSeats: bookingBody.seats,
-        date: new Date(),
+        date: bookingBody.date,
         startTime: bookingBody.startTime,
         endTime: bookingBody.endTime,
       };
@@ -105,6 +103,7 @@ const createBooking = async (userId, bookingBody) => {
       const booking = await Booking.findOne({
         user: userId,
         slot: mongoose.Types.ObjectId(bookingBody.slot),
+        date: { $gte: gte, $lte: lte },
       });
       if (booking)
         throw new ApiError(
@@ -124,7 +123,7 @@ const createBooking = async (userId, bookingBody) => {
           bookingSlot: bookingSlot._id,
           slot: bookingBody.slot,
           reservedSeats: bookingBody.seats,
-          date: new Date(),
+          date: bookingBody.date,
           startTime: bookingBody.startTime,
           endTime: bookingBody.endTime,
         };
@@ -142,14 +141,7 @@ const createBooking = async (userId, bookingBody) => {
 };
 
 const getAllBooking = async (filter, options) => {
-  return await Booking.find()
-    .populate("user")
-    .populate({
-      path: "bookingSlot",
-      populate: {
-        path: "slot",
-      },
-    });
+  return await Booking.paginate(filter, options);
 };
 
 const getSingleBooking = async (id) => {
@@ -171,7 +163,8 @@ const getBookingsOfLoggedUser = async (userId) => {
       populate: {
         path: "slot",
       },
-    });
+    })
+    .sort({ createdAt: -1 });
 };
 
 const validateSlotTime = async (startTime, endTime, slot) => {
@@ -181,13 +174,9 @@ const validateSlotTime = async (startTime, endTime, slot) => {
   if (endHours < startHours) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "start time cannot be lesser then end time"
+      "start time cannot be greater than end time"
     );
   }
-  console.log(Number(startHours) < slot.startTime.hour);
-  console.log(Number(startHours) > slot.endTime.hour);
-  console.log(Number(endHours) > slot.endTime.hour);
-  console.log(Number(endHours) < slot.startTime.hour);
   if (
     Number(startHours) < slot.startTime.hour ||
     Number(startHours) > slot.endTime.hour ||
@@ -199,8 +188,33 @@ const validateSlotTime = async (startTime, endTime, slot) => {
 };
 
 const cancelBooking = async (id, user) => {
-  const booking = await Booking.findById(id);
-  console.log(booking);
+  const booking = await Booking.findById(id)
+    .populate("slot")
+    .populate("bookingSlot");
+  if (!booking) throw new ApiError(httpStatus.BAD_REQUEST, "No booking found!");
+  const now = new Date();
+  let bookingDate = new Date(booking.date);
+  bookingDate = new Date(bookingDate.setHours(booking.slot.endTime.hour));
+  if (bookingDate < now)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Reservation has expired, you cannot cancel it!"
+    );
+  if (booking.cancelled)
+    throw new ApiError(httpStatus.BAD_REQUEST, "Booking is already cancelled!");
+  const updatedBooking = booking;
+  booking.cancelled = true;
+  Object.assign(booking, updatedBooking);
+  await booking.save();
+  await BookingSlots.updateOne(
+    { _id: booking.bookingSlot.id },
+    {
+      $inc: {
+        reservedTables: -booking.reservedSeats,
+        unReservedTable: booking.reservedSeats,
+      },
+    }
+  );
   return booking;
 };
 module.exports = {

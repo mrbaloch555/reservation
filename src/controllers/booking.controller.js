@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const { bookingService, bookingSlotsService } = require("../services");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
+const pick = require("../utils/pick");
 // const { blogService } = require("../services");
 
 const createBooking = catchAsync(async (req, res) => {
@@ -15,9 +16,15 @@ const createBooking = catchAsync(async (req, res) => {
 
 const getAllBookings = catchAsync(async (req, res) => {
   const filter = {};
-  const options = {};
-  options.populate = "user,bookingSlot";
+  const options = pick(req.query, ["sortBy", "limit", "page"]);
+  options.populate = "user,bookingSlot,slot";
   const bookings = await bookingService.getAllBooking(filter, options);
+  bookings.results.forEach((res) => {
+    const now = new Date();
+    let bookingDate = new Date(res.date);
+    bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
+    if (bookingDate < now) res.expired = true;
+  });
   res.status(httpStatus.OK).send(bookings);
 });
 

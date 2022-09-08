@@ -38,6 +38,14 @@ const bookingSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    cancelled: {
+      type: Boolean,
+      default: false,
+    },
+    expired: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

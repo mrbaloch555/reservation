@@ -29,7 +29,7 @@ const paginate = (schema) => {
       });
       sort = sortingCriteria.join(" ");
     } else {
-      sort = { programDate: -1 };
+      sort = { createdAt: -1 };
     }
     const limit =
       options.limit && parseInt(options.limit) > 0

@@ -8,6 +8,7 @@ const createBooking = {
     seats: Joi.number().required(),
     startTime: Joi.string().required(),
     endTime: Joi.string().required(),
+    event: Joi.string().allow().optional(),
   }),
 };
 
