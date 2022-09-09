@@ -147,23 +147,15 @@ const getAllBooking = async (filter, options) => {
 const getSingleBooking = async (id) => {
   return await Booking.findById(id)
     .populate("user")
-    .populate({
-      path: "bookingSlot",
-      populate: {
-        path: "slot",
-      },
-    });
+    .populate("bookingSlot")
+    .populate("slot");
 };
 
 const getBookingsOfLoggedUser = async (userId) => {
   return await Booking.find({ user: mongoose.Types.ObjectId(userId) })
     .populate("user")
-    .populate({
-      path: "bookingSlot",
-      populate: {
-        path: "slot",
-      },
-    })
+    .populate("bookingSlot")
+    .populate("slot")
     .sort({ createdAt: -1 });
 };
 

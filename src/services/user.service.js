@@ -3,13 +3,21 @@ const { User, Connection } = require("../models");
 const ApiError = require("../utils/ApiError");
 const generateJwtToken = require("./../config/generateToken");
 const bcrypt = require("bcryptjs");
+
 /**
  * Create a user
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
 const register = async (userBody) => {
-  return await User.create(userBody);
+  const existEmail = await User.findOne({
+    $and: [{ email: userBody.email }, { role: "user" }],
+  });
+  if (existEmail) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User Already Exist");
+  }
+  const saveUser = await User.create(userBody);
+  return saveUser;
 };
 
 const login = async (userBody) => {

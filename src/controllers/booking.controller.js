@@ -19,11 +19,14 @@ const getAllBookings = catchAsync(async (req, res) => {
   const options = pick(req.query, ["sortBy", "limit", "page"]);
   options.populate = "user,bookingSlot,slot";
   const bookings = await bookingService.getAllBooking(filter, options);
+  console.log(bookings);
   bookings.results.forEach((res) => {
     const now = new Date();
     let bookingDate = new Date(res.date);
-    bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
-    if (bookingDate < now) res.expired = true;
+    if (res.slot) {
+      bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
+      if (bookingDate < now) res.expired = true;
+    }
   });
   res.status(httpStatus.OK).send(bookings);
 });
@@ -41,8 +44,10 @@ const getBookingsOfLoggedUser = catchAsync(async (req, res) => {
   bookings.forEach((res) => {
     const now = new Date();
     let bookingDate = new Date(res.date);
-    bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
-    if (bookingDate < now) res.expired = true;
+    if (res.slot) {
+      bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
+      if (bookingDate < now) res.expired = true;
+    }
   });
   res.status(httpStatus.OK).send(bookings);
 });
