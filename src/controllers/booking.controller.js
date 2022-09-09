@@ -38,6 +38,12 @@ const getSingleBooking = catchAsync(async (req, res) => {
 
 const getBookingsOfLoggedUser = catchAsync(async (req, res) => {
   const bookings = await bookingService.getBookingsOfLoggedUser(req.user._id);
+  bookings.forEach((res) => {
+    const now = new Date();
+    let bookingDate = new Date(res.date);
+    bookingDate = new Date(bookingDate.setHours(res.slot.endTime.hour));
+    if (bookingDate < now) res.expired = true;
+  });
   res.status(httpStatus.OK).send(bookings);
 });
 
