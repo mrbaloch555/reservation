@@ -15,7 +15,7 @@ router
 router
   .route("/login")
   .post(validate(userValidation.login), userController.login);
-
+router.route("/latestTime/:userId").get(userController.addLatestTime);
 router.route("/").get(userController.getAllUser);
 router
   .route("/:userId")

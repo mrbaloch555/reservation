@@ -14,7 +14,6 @@ const createBookingSlot = async (body) => {
 };
 
 const updateSeats = async (id, inc) => {
-  console.log("Id => ", id);
   await BookingSlots.updateOne(
     { _id: mongoose.Types.ObjectId(id) },
     { $inc: { reservedTables: inc, unReservedTable: -inc } }
@@ -28,7 +27,6 @@ const getBookingSlot = async (date, id) => {
     date: { $gte: gte, $lte: lte },
     slot: mongoose.Types.ObjectId(id),
   }).populate("slot");
-  console.log(bookingSlot);
   return bookingSlot;
 };
 module.exports = {

@@ -14,10 +14,18 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    latestTime: {
+      type: Date,
+      default: Date.now(),
+    },
     email: {
       type: String,
       required: true,
       trim: true,
+    },
+    phone: {
+      type: String,
+      default: "",
     },
     password: {
       type: String,

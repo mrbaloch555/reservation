@@ -95,8 +95,8 @@ const updateUser = async (query, body) => {
 };
 
 const getAllUser = async () => {
-  const users = await User.find({ role: "user" });
-  if (!users) {
+  const users = await User.find({ role: "user" }).sort({ latestTime: -1 });
+  if (users.length < 0) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No User Found");
   }
   return users;
@@ -109,6 +109,17 @@ const deleteUser = async (query, body) => {
   }
   return "User Deleted Successfully";
 };
+
+const addLatestTime = async (query) => {
+  const updateUser = await User.findByIdAndUpdate(query, {
+    latestTime: Date.now(),
+  });
+  if (!updateUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No User Found");
+  }
+  return "Time Added Successfully";
+};
+
 module.exports = {
   register,
   login,
@@ -118,4 +129,5 @@ module.exports = {
   forgetPassword,
   updateUser,
   deleteUser,
+  addLatestTime,
 };

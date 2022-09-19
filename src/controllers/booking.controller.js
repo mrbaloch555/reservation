@@ -14,12 +14,16 @@ const createBooking = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(bookingResult);
 });
 
+const approveReservation = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const booking = await bookingService.approveReservation(id);
+  res.send(booking);
+});
 const getAllBookings = catchAsync(async (req, res) => {
   const filter = {};
   const options = pick(req.query, ["sortBy", "limit", "page"]);
   options.populate = "user,bookingSlot,slot";
   const bookings = await bookingService.getAllBooking(filter, options);
-  console.log(bookings);
   bookings.results.forEach((res) => {
     const now = new Date();
     let bookingDate = new Date(res.date);
@@ -72,4 +76,5 @@ module.exports = {
   getBookingsOfLoggedUser,
   cancelBooking,
   getBookingSlot,
+  approveReservation,
 };

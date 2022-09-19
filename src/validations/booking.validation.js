@@ -12,6 +12,11 @@ const createBooking = {
   }),
 };
 
+const approveReservation = {
+  query: Joi.object().keys({
+    id: Joi.string().custom(objectId),
+  }),
+};
 const getSingleBooking = {
   query: Joi.object().keys({
     id: Joi.string().custom(objectId),
@@ -188,4 +193,5 @@ module.exports = {
   getSingleBooking,
   cancelBooking,
   getBookingSlot,
+  approveReservation,
 };

@@ -42,6 +42,10 @@ const bookingSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    approved: {
+      type: Boolean,
+      required: true,
+    },
     expired: {
       type: Boolean,
       default: false,

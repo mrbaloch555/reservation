@@ -18,6 +18,13 @@ router
   )
   .get(bookingController.getAllBookings);
 
+router.patch(
+  "/approve/:id",
+  requireSignin,
+  adminMiddleware,
+  validate(bookingValidation.approveReservation),
+  bookingController.approveReservation
+);
 router
   .route("/:id")
   .get(

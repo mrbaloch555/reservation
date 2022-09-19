@@ -65,9 +65,10 @@ const createBooking = async (userId, bookingBody) => {
         date: bookingBody.date,
         startTime: bookingBody.startTime,
         endTime: bookingBody.endTime,
+        approved: false,
       };
       const booking = await Booking.create(newBooking);
-      await bookingSlotService.updateSeats(bookingSlot.id, bookingBody.seats);
+      // await bookingSlotService.updateSeats(bookingSlot.id, bookingBody.seats);
       return booking;
     } else {
       throw new ApiError(
@@ -85,8 +86,6 @@ const createBooking = async (userId, bookingBody) => {
     );
     if (valid) {
       const now = new Date();
-      console.log(date);
-      console.log(now);
       const diffTime = Math.abs(date - now);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       if (diffDays > 30)
@@ -94,7 +93,6 @@ const createBooking = async (userId, bookingBody) => {
           httpStatus.BAD_REQUEST,
           "You can book reservation within 30 days!"
         );
-      console.log(diffDays);
       if (bookingBody.seats > 8)
         throw new ApiError(
           httpStatus.BAD_REQUEST,
@@ -126,9 +124,10 @@ const createBooking = async (userId, bookingBody) => {
           date: bookingBody.date,
           startTime: bookingBody.startTime,
           endTime: bookingBody.endTime,
+          approved: false,
         };
         const booking = await Booking.create(newBooking);
-        await bookingSlotService.updateSeats(bookingSlot.id, bookingBody.seats);
+        // await bookingSlotService.updateSeats(bookingSlot.id, bookingBody.seats);
         return booking;
       }
     } else {
@@ -140,6 +139,19 @@ const createBooking = async (userId, bookingBody) => {
   }
 };
 
+const approveReservation = async (id) => {
+  const booking = await Booking.findById(id);
+  if (booking.approved)
+    throw new ApiError(httpStatus.BAD_REQUEST, "Reservation already approved!");
+  const bookingSlotId = booking.bookingSlot;
+  await bookingSlotService.updateSeats(bookingSlotId, booking.reservedSeats);
+  const updatedBooking = {
+    approved: true,
+  };
+  Object.assign(booking, updatedBooking);
+  await booking.save();
+  return booking;
+};
 const getAllBooking = async (filter, options) => {
   return await Booking.paginate(filter, options);
 };
@@ -160,7 +172,6 @@ const getBookingsOfLoggedUser = async (userId) => {
 };
 
 const validateSlotTime = async (startTime, endTime, slot) => {
-  console.log("Slot = ", slot);
   const startHours = startTime.slice(0, 2);
   const endHours = endTime.slice(0, 2);
   if (endHours < startHours) {
@@ -198,19 +209,21 @@ const cancelBooking = async (id, user) => {
   booking.cancelled = true;
   Object.assign(booking, updatedBooking);
   await booking.save();
-  await BookingSlots.updateOne(
-    { _id: booking.bookingSlot.id },
-    {
-      $inc: {
-        reservedTables: -booking.reservedSeats,
-        unReservedTable: booking.reservedSeats,
-      },
-    }
-  );
+  if (booking.approved)
+    await BookingSlots.updateOne(
+      { _id: booking.bookingSlot.id },
+      {
+        $inc: {
+          reservedTables: -booking.reservedSeats,
+          unReservedTable: booking.reservedSeats,
+        },
+      }
+    );
   return booking;
 };
 module.exports = {
   createBooking,
+  approveReservation,
   getAllBooking,
   getSingleBooking,
   getBookingsOfLoggedUser,
