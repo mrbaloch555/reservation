@@ -20,6 +20,7 @@ router
   .route("/:productId")
   .patch(
     requireSignin,
+    adminMiddleware,
     fileUpload.array("productPicture"),
     productController.updateProduct
   )

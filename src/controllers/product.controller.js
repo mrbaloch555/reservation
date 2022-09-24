@@ -43,9 +43,10 @@ const updateProduct = catchAsync(async (req, res) => {
     body.productPicture = productPicture;
   }
   const product = await productService.updateProduct(productId, body);
-  product.productPicture.forEach((element) => {
-    element.img = config.rootPath + element.img;
-  });
+  if (product.productPicture.length > 0)
+    product.productPicture.forEach((element) => {
+      element.img = config.rootPath + element.img;
+    });
   res.status(httpStatus.CREATED).send(product);
 });
 
