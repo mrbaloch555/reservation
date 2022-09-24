@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("../utils/catchAsync");
 const { productService } = require("../services");
+const config = require("../config/config");
 
 const createProduct = catchAsync(async (req, res) => {
   let productPicture = [];
@@ -17,6 +18,12 @@ const createProduct = catchAsync(async (req, res) => {
 
 const getAllProduct = catchAsync(async (req, res) => {
   const product = await productService.getAllProduct(req.query);
+  product.product = product.product.map((element) => {
+    element.productPicture.map((el) => {
+      el.img = config.rootPath + el.img;
+    });
+    return element;
+  });
   res.status(httpStatus.CREATED).send(product);
 });
 
@@ -36,6 +43,9 @@ const updateProduct = catchAsync(async (req, res) => {
     body.productPicture = productPicture;
   }
   const product = await productService.updateProduct(productId, body);
+  product.productPicture.forEach((element) => {
+    element.img = config.rootPath + element.img;
+  });
   res.status(httpStatus.CREATED).send(product);
 });
 

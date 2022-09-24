@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+const config = require("../config/config");
 const { Product } = require("../models");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
