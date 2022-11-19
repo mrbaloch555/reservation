@@ -1,4 +1,4 @@
-# Resturant Reservation
+# Resturant Reservation System (MERN Project)
 
 ## Techs
   ### NodeJS
